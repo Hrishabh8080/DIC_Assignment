@@ -1,23 +1,58 @@
-import logo from './logo.svg';
 import './App.css';
+import ListItem from './ListItem';
+import { demoData } from './Data';
+import { useState } from 'react';
 
 function App() {
+  const [customData, setCustomData] = useState(demoData);
+
+  const handleClickExpand = (itemName) => {
+    const newData = customData.map((data) => {
+      if (data.name === itemName) {
+        return {
+          ...data,
+          isExpanded: !data.isExpanded,
+        };
+      }
+      if (data.children) {
+        return {
+          ...data,
+          children: data.children.map((child) => {
+            if (child.name === itemName) {
+              return {
+                ...child,
+                isExpanded: !child.isExpanded,
+              };
+            }
+            return child;
+          }),
+        };
+      }
+      return data;
+    });
+    setCustomData(newData);
+  };
+
+  const createNestedList = (data) => {
+    return data.map((item, index) => {
+      return (
+        <li key={index}>
+          <ListItem itemName={item.name} handleClick={() => handleClickExpand(item.name)} />
+          {item.isExpanded && item.children && (
+            <ul>
+              {createNestedList(item.children)}
+            </ul>
+          )}
+        </li>
+      );
+    });
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ul>
+        {createNestedList(customData)}
+      </ul>
     </div>
   );
 }
